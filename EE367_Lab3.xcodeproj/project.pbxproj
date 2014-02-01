@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4B367234189DBA050068345C /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 4B367233189DBA050068345C /* main.c */; };
 		4B367236189DBA050068345C /* EE367_Lab3.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4B367235189DBA050068345C /* EE367_Lab3.1 */; };
+		4B84F5D1189DBB920079D48F /* client.c in Sources */ = {isa = PBXBuildFile; fileRef = 4B84F5CA189DBB920079D48F /* client.c */; };
+		4B84F5D2189DBB920079D48F /* pipe in Sources */ = {isa = PBXBuildFile; fileRef = 4B84F5CE189DBB920079D48F /* pipe */; };
+		4B84F5D3189DBB920079D48F /* server in Sources */ = {isa = PBXBuildFile; fileRef = 4B84F5D0189DBB920079D48F /* server */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,8 +28,14 @@
 
 /* Begin PBXFileReference section */
 		4B367230189DBA050068345C /* EE367_Lab3 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = EE367_Lab3; sourceTree = BUILT_PRODUCTS_DIR; };
-		4B367233189DBA050068345C /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		4B367235189DBA050068345C /* EE367_Lab3.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = EE367_Lab3.1; sourceTree = "<group>"; };
+		4B84F5CA189DBB920079D48F /* client.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = client.c; sourceTree = "<group>"; };
+		4B84F5CB189DBB920079D48F /* file1.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = file1.txt; sourceTree = "<group>"; };
+		4B84F5CC189DBB920079D48F /* file2.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = file2.txt; sourceTree = "<group>"; };
+		4B84F5CD189DBB920079D48F /* file3.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = file3.txt; sourceTree = "<group>"; };
+		4B84F5CE189DBB920079D48F /* pipe */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pipe; sourceTree = "<group>"; };
+		4B84F5CF189DBB920079D48F /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		4B84F5D0189DBB920079D48F /* server */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = server; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,7 +68,13 @@
 		4B367232189DBA050068345C /* EE367_Lab3 */ = {
 			isa = PBXGroup;
 			children = (
-				4B367233189DBA050068345C /* main.c */,
+				4B84F5CA189DBB920079D48F /* client.c */,
+				4B84F5CB189DBB920079D48F /* file1.txt */,
+				4B84F5CC189DBB920079D48F /* file2.txt */,
+				4B84F5CD189DBB920079D48F /* file3.txt */,
+				4B84F5CE189DBB920079D48F /* pipe */,
+				4B84F5CF189DBB920079D48F /* README */,
+				4B84F5D0189DBB920079D48F /* server */,
 				4B367235189DBA050068345C /* EE367_Lab3.1 */,
 			);
 			path = EE367_Lab3;
@@ -117,7 +131,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4B367234189DBA050068345C /* main.c in Sources */,
+				4B84F5D3189DBB920079D48F /* server in Sources */,
+				4B84F5D1189DBB920079D48F /* client.c in Sources */,
+				4B84F5D2189DBB920079D48F /* pipe in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -225,6 +241,7 @@
 				4B36723B189DBA050068345C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

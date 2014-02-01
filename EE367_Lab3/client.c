@@ -28,14 +28,16 @@ void *get_in_addr(struct sockaddr *sa)
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-int main(int argc, char *argv[])
+int main(int argc)
 {
 	int sockfd, numbytes;  
 	char buf[MAXDATASIZE];
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
 	char s[INET6_ADDRSTRLEN];
-
+    char argv1[100];
+    char *argv[] = $argv1[];
+    
 	if (argc != 2) {
 	    fprintf(stderr,"usage: client hostname\n");
 	    exit(1);
