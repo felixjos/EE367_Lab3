@@ -2,6 +2,7 @@
 ** server.c -- a stream socket server demo
 */
 
+// ADDED A COMMENT
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
