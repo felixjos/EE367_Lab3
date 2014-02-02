@@ -28,14 +28,28 @@ void *get_in_addr(struct sockaddr *sa)
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-int main(int argc, char *argv[])
+void get_address(int *argc, char *addr)
+{
+    fprintf(stderr,"Please enter IP Address of Server: ");
+    scanf("%s", addr);
+    fprintf(stderr,"Connecting to Server Address: %s\n",addr);
+    *argc = 2;
+}
+
+int main()
 {
 	int sockfd, numbytes;  
 	char buf[MAXDATASIZE];
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
 	char s[INET6_ADDRSTRLEN];
+    int argc;
+    char address[100];
+    char *addr = &address[0];
 
+    get_address(&argc, addr);
+    
+    fprintf(stderr, "Checking Argc value = %d\n", argc);
 	if (argc != 2) {
 	    fprintf(stderr,"usage: client hostname\n");
 	    exit(1);
@@ -45,7 +59,7 @@ int main(int argc, char *argv[])
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
-	if ((rv = getaddrinfo(argv[1], PORT, &hints, &servinfo)) != 0) {
+	if ((rv = getaddrinfo(&addr[0], PORT, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
