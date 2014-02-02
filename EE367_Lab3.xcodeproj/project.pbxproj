@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		4B367236189DBA050068345C /* EE367_Lab3.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4B367235189DBA050068345C /* EE367_Lab3.1 */; };
-		4BB07AFF189DC7ED001B149E /* client.c in Sources */ = {isa = PBXBuildFile; fileRef = 4BB07AF8189DC7ED001B149E /* client.c */; };
-		4BB07B00189DC7ED001B149E /* pipe.c in Sources */ = {isa = PBXBuildFile; fileRef = 4BB07AFC189DC7ED001B149E /* pipe.c */; };
+		4BB07AFF189DC7ED001B149E /* client in Sources */ = {isa = PBXBuildFile; fileRef = 4BB07AF8189DC7ED001B149E /* client */; };
+		4BB07B00189DC7ED001B149E /* pipe in Sources */ = {isa = PBXBuildFile; fileRef = 4BB07AFC189DC7ED001B149E /* pipe */; };
 		4BB07B01189DC7ED001B149E /* server.c in Sources */ = {isa = PBXBuildFile; fileRef = 4BB07AFE189DC7ED001B149E /* server.c */; };
 /* End PBXBuildFile section */
 
@@ -29,11 +29,11 @@
 /* Begin PBXFileReference section */
 		4B367230189DBA050068345C /* EE367_Lab3 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = EE367_Lab3; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B367235189DBA050068345C /* EE367_Lab3.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = EE367_Lab3.1; sourceTree = "<group>"; };
-		4BB07AF8189DC7ED001B149E /* client.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = client.c; sourceTree = "<group>"; };
+		4BB07AF8189DC7ED001B149E /* client */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = client; sourceTree = "<group>"; };
 		4BB07AF9189DC7ED001B149E /* file1.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = file1.txt; sourceTree = "<group>"; };
 		4BB07AFA189DC7ED001B149E /* file2.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = file2.txt; sourceTree = "<group>"; };
 		4BB07AFB189DC7ED001B149E /* file3.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = file3.txt; sourceTree = "<group>"; };
-		4BB07AFC189DC7ED001B149E /* pipe.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pipe.c; sourceTree = "<group>"; };
+		4BB07AFC189DC7ED001B149E /* pipe */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = pipe; sourceTree = "<group>"; };
 		4BB07AFD189DC7ED001B149E /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		4BB07AFE189DC7ED001B149E /* server.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = server.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -69,11 +69,11 @@
 			isa = PBXGroup;
 			children = (
 				4B367235189DBA050068345C /* EE367_Lab3.1 */,
-				4BB07AF8189DC7ED001B149E /* client.c */,
+				4BB07AF8189DC7ED001B149E /* client */,
 				4BB07AF9189DC7ED001B149E /* file1.txt */,
 				4BB07AFA189DC7ED001B149E /* file2.txt */,
 				4BB07AFB189DC7ED001B149E /* file3.txt */,
-				4BB07AFC189DC7ED001B149E /* pipe.c */,
+				4BB07AFC189DC7ED001B149E /* pipe */,
 				4BB07AFD189DC7ED001B149E /* README */,
 				4BB07AFE189DC7ED001B149E /* server.c */,
 			);
@@ -132,8 +132,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4BB07B01189DC7ED001B149E /* server.c in Sources */,
-				4BB07AFF189DC7ED001B149E /* client.c in Sources */,
-				4BB07B00189DC7ED001B149E /* pipe.c in Sources */,
+				4BB07AFF189DC7ED001B149E /* client in Sources */,
+				4BB07B00189DC7ED001B149E /* pipe in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
