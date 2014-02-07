@@ -18,16 +18,25 @@
 #define PORT "3490"  // the port users will be connecting to
 
 #define BACKLOG 10	 // how many pending connections queue will hold
-
+#define DEBUGGER 1
 void sigchld_handler(int s)
 {
+#ifdef DEBUGGER
+    printf("DEBUG:calling sigchld_handler\n");
+#endif
 	while(waitpid(-1, NULL, WNOHANG) > 0);
 }
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
+#ifdef DEBUGGER
+    printf("DEBUG: calling get_in_addr\n");
+#endif
 	if (sa->sa_family == AF_INET) {
+#ifdef DEBUGGER
+        printf("DEBUG:36");
+#endif
 		return &(((struct sockaddr_in*)sa)->sin_addr);
 	}
 
@@ -51,25 +60,40 @@ int main(void)
 	hints.ai_flags = AI_PASSIVE; // use my IP
 
 	if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
+#ifdef DEBUGGER
+        printf("DEBUG:59");
+#endif
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
 
 	// loop through all the results and bind to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next) {
+#ifdef DEBUGGER
+        printf("DEBUG:68");
+#endif
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {
+#ifdef DEBUGGER
+            printf("DEBUG:72");
+#endif
 			perror("server: socket");
 			continue;
 		}
 
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
 				sizeof(int)) == -1) {
+#ifdef DEBUGGER
+            printf("DEBUG:81");
+#endif
 			perror("setsockopt");
 			exit(1);
 		}
 
 		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+#ifdef DEBUGGER
+            printf("DEBUG:90");
+#endif
 			close(sockfd);
 			perror("server: bind");
 			continue;
@@ -86,6 +110,9 @@ int main(void)
 	freeaddrinfo(servinfo); // all done with this structure
 
 	if (listen(sockfd, BACKLOG) == -1) {
+#ifdef DEBUGGER
+        printf("DEBUG:109");
+#endif
 		perror("listen");
 		exit(1);
 	}
@@ -94,6 +121,9 @@ int main(void)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+#ifdef DEBUGGER
+        printf("DEBUG:120");
+#endif
 		perror("sigaction");
 		exit(1);
 	}
@@ -101,22 +131,36 @@ int main(void)
 	printf("server: waiting for connections...\n");
 
 	while(1) {  // main accept() loop
+#ifdef DEBUGGER
+        printf("DEBUG-105:entering while loop\n");
+#endif
 		sin_size = sizeof their_addr;
+#ifdef DEBUGGER
+        printf("DEBUG: Accept...\n");
+#endif
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
 		if (new_fd == -1) {
+#ifdef DEBUGGER
+            printf("DEBUG:new_fd = -1");
+#endif
 			perror("accept");
 			continue;
 		}
-
+#ifdef DEBUGGER
+        printf("DEBUG: inet_ntop...\n");
+#endif
 		inet_ntop(their_addr.ss_family,
 			get_in_addr((struct sockaddr *)&their_addr),
 			s, sizeof s);
 		printf("server: got connection from %s\n", s);
 
 		if (!fork()) { // this is the child process
+#ifdef DEBUGGER
+            printf("DEBUG:fork = 0");
+#endif
 			close(sockfd); // child doesn't need the listener
 			if (send(new_fd, "Hello, world!", 13, 0) == -1)
-				perror("send");
+				perror("send failed");
 			close(new_fd);
 			exit(0);
 		}
