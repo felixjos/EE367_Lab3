@@ -18,8 +18,7 @@
 #define PORT "3490"  // the port users will be connecting to
 
 #define BACKLOG 10	 // how many pending connections queue will hold
-#define DEBUGGER 1
-#define MAXDATASIZE 100 // data to be recieved
+#define MAXDATASIZE 2 // data to be recieved
 void sigchld_handler(int s)
 {
 #ifdef DEBUGGER
@@ -55,8 +54,7 @@ int main(void)
 	char s[INET6_ADDRSTRLEN];
 	int rv;
     int numbytes;
-    char msg;
-    char buf[MAXDATASIZE];
+    char commandBuf[MAXDATASIZE];
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -182,34 +180,51 @@ int main(void)
 #endif
 			if (send(new_fd, "Connected to Server...\nPlease Enter Command", 45, 0) == -1)
 				perror("send failed");
-            if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1,0)) == -1) {
+            while(1)
+            {
+            if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE,0)) == -1) {
 				perror("recv failed");
                 exit(1);
             }
-            buf[numbytes] = '\0';
-            printf("server: received '%s' \n", buf);
-            switch(buf[MAXDATASIZE-1])
+            commandBuf[numbytes] = '\0';
+            printf("server: received command '%c' \n", commandBuf[0]);
+            switch(commandBuf[0])
             {
-                case 'a': msg = 'a';
+                case 'a': {
+                    if (send(new_fd, "A received\n", 10, 0) == -1)
+                    perror("send failed");
                     break;
-                case 'e': msg = 'e';
+                }
+                case 'e': {
+                    if (send(new_fd, "Exiting Server\n", 10, 0) == -1)
+                        perror("send failed");
+                    printf("Closing Connection with %s", s);
+                    close(new_fd);
+                    exit(0);
                     break;
-                case 'i': msg = 'i';
+                }
+                case 'i': {
+                    if (send(new_fd, "I received\n", 10, 0) == -1)
+                        perror("send failed");
                     break;
-                case 'o': msg = 'o';
+                }
+                case 'o': {
+                    if (send(new_fd, "O received\n", 10, 0) == -1)
+                        perror("send failed");
                     break;
-                case 'u': msg = 'u';
+                }
+                case 'u': {
+                    if (send(new_fd, "U received\n", 10, 0) == -1)
+                        perror("send failed");
                     break;
-                default: msg = 'k';
+                }
+                default: {
+                    if (send(new_fd, "Unknown Command\n", 15, 0) == -1)
+                        perror("send failed");
                     break;
+                }
             }
-        if (send(new_fd, &msg, 1, 0) == -1)
-            perror("send failed");
-#ifdef DEBUGGER
-            printf("DEBUG86: closeing new_fd = %d\n", new_fd);
-#endif
-			close(new_fd);
-			exit(0);
+            }
 		}
 #ifdef DEBUGGER
         printf("DEBUG179: Parent waiting to close new_fd\n");
