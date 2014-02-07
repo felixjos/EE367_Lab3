@@ -16,7 +16,9 @@
 
 #define PORT "3490" // the port client will be connecting to 
 
-#define MAXDATASIZE 100 // max number of bytes we can get at once 
+#define MAXDATASIZE 100 // max number of bytes we can get at once
+
+#define DEBUGGER 1
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -36,6 +38,12 @@ void get_address(int *argc, char *addr)
     *argc = 2;
 }
 
+void get_command(char *command)
+{
+    scanf("%c", command);
+}
+
+
 int main()
 {
 	int sockfd, numbytes;  
@@ -46,6 +54,7 @@ int main()
     int argc;
     char address[100];
     char *addr = &address[0];
+    char command;
 
     get_address(&argc, addr);
     
@@ -92,6 +101,9 @@ int main()
 
 	freeaddrinfo(servinfo); // all done with this structure
 
+#ifdef DEBUGGER
+    printf("DEBUG 105: sockfd = %d\n",sockfd);
+#endif
 	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
 	    perror("recv");
 	    exit(1);
@@ -101,6 +113,30 @@ int main()
 
 	printf("client: received '%s'\n",buf);
 
+    
+    while(command != 'a')
+    {
+        get_command(&command);
+    }
+    
+    if (send(sockfd, &command, 1, 0) == -1) {
+	    perror("send failed");
+	}
+    
+    
+    if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+	    perror("recv");
+	    exit(1);
+	}
+    
+	buf[numbytes] = '\0';
+    
+	printf("client: received '%s'\n",buf);
+
+    
+    
+    
+    
 	close(sockfd);
 
 	return 0;
