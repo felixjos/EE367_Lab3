@@ -19,6 +19,7 @@
 
 #define BACKLOG 10	 // how many pending connections queue will hold
 #define DEBUGGER 1
+#define MAXDATASIZE 100 // data to be recieved
 void sigchld_handler(int s)
 {
 #ifdef DEBUGGER
@@ -35,7 +36,7 @@ void *get_in_addr(struct sockaddr *sa)
 #endif
 	if (sa->sa_family == AF_INET) {
 #ifdef DEBUGGER
-        printf("DEBUG:36");
+        printf("DEBUG:38\n");
 #endif
 		return &(((struct sockaddr_in*)sa)->sin_addr);
 	}
@@ -53,6 +54,9 @@ int main(void)
 	int yes=1;
 	char s[INET6_ADDRSTRLEN];
 	int rv;
+    int numbytes;
+    char msg;
+    char buf[MAXDATASIZE];
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -66,11 +70,13 @@ int main(void)
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
-
+#ifdef DEBUGGER
+    printf("DEBUG: rv value = %d\n", rv);
+#endif
 	// loop through all the results and bind to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next) {
 #ifdef DEBUGGER
-        printf("DEBUG:68");
+        printf("DEBUG:68\n");
 #endif
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {
@@ -80,7 +86,9 @@ int main(void)
 			perror("server: socket");
 			continue;
 		}
-
+#ifdef DEBUGGER
+        printf("DEBUG86: sockfd = %d\n", sockfd);
+#endif
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
 				sizeof(int)) == -1) {
 #ifdef DEBUGGER
@@ -89,7 +97,9 @@ int main(void)
 			perror("setsockopt");
 			exit(1);
 		}
-
+#ifdef DEBUGGER
+        printf("DEBUG97: sockfd = %d\n", sockfd);
+#endif
 		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
 #ifdef DEBUGGER
             printf("DEBUG:90");
@@ -98,7 +108,9 @@ int main(void)
 			perror("server: bind");
 			continue;
 		}
-
+#ifdef DEBUGGER
+        printf("DEBUG108: sockfd = %d\n", sockfd);
+#endif
 		break;
 	}
 
@@ -139,11 +151,14 @@ int main(void)
         printf("DEBUG: Accept...\n");
 #endif
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+#ifdef DEBUGGER
+        printf("DEBUG86: newfd = %d\n", new_fd);
+#endif
 		if (new_fd == -1) {
 #ifdef DEBUGGER
             printf("DEBUG:new_fd = -1");
 #endif
-			perror("accept");
+			perror("accept failed");
 			continue;
 		}
 #ifdef DEBUGGER
@@ -156,14 +171,49 @@ int main(void)
 
 		if (!fork()) { // this is the child process
 #ifdef DEBUGGER
-            printf("DEBUG:fork = 0");
+            printf("DEBUG:fork = 0\n");
+#endif
+#ifdef DEBUGGER
+            printf("DEBUG:closeing socket sockfd\n");
 #endif
 			close(sockfd); // child doesn't need the listener
-			if (send(new_fd, "Hello, world!", 13, 0) == -1)
+#ifdef DEBUGGER
+            printf("DEBUG86: sending msg to new_fd = %d\n", new_fd);
+#endif
+			if (send(new_fd, "Connected to Server...\nPlease Enter Command", 45, 0) == -1)
 				perror("send failed");
+            if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1,0)) == -1) {
+				perror("recv failed");
+                exit(1);
+            }
+            buf[numbytes] = '\0';
+            printf("server: received '%s' \n", buf);
+            switch(buf[MAXDATASIZE-1])
+            {
+                case 'a': msg = 'a';
+                    break;
+                case 'e': msg = 'e';
+                    break;
+                case 'i': msg = 'i';
+                    break;
+                case 'o': msg = 'o';
+                    break;
+                case 'u': msg = 'u';
+                    break;
+                default: msg = 'k';
+                    break;
+            }
+        if (send(new_fd, &msg, 1, 0) == -1)
+            perror("send failed");
+#ifdef DEBUGGER
+            printf("DEBUG86: closeing new_fd = %d\n", new_fd);
+#endif
 			close(new_fd);
 			exit(0);
 		}
+#ifdef DEBUGGER
+        printf("DEBUG179: Parent waiting to close new_fd\n");
+#endif
 		close(new_fd);  // parent doesn't need this
 	}
 
