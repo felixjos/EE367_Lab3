@@ -41,9 +41,7 @@ void get_address(int *argc, char *addr)
 
 void get_command(char *command)
 {
-    
-    scanf("%c", command);
-    
+    scanf("%s", command);
 }
 
 
@@ -57,7 +55,7 @@ int main()
     int argc;
     char address[100];
     char *addr = &address[0];
-    char command;
+    char command[MAXDATASIZE];
 
     get_address(&argc, addr);
     
@@ -120,11 +118,13 @@ int main()
     while(1)
     {
         get_command(&command);
-        
-    if (command != '\n')
+     
+    if(strcmp(command,"help") == 0)
+        printf("list: list files at the server\ncheck <file name>: checks if there is a file <file name>\ndisplay <file name>: Displays the contents of <file name>\ndownload <file name>: Download <file name>\nquit: Close the connection to the server\nPlease Enter Command:\n");
+    else if (strcmp(command,"\n") != 0)
     {
         
-    if (send(sockfd, &command, 1, 0) == -1) {
+    if (send(sockfd, &command, MAXDATASIZE-1, 0) == -1) {
 	    perror("send failed");
 	}
     
@@ -137,7 +137,7 @@ int main()
 	printf("client: received '%s'\n",buf);
     
     
-    if(command == 'e')
+    if(strcmp(command,"quit") == 0)
 	{
         close(sockfd);
         return 0;
