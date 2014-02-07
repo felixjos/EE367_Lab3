@@ -18,7 +18,7 @@
 #define PORT "3490"  // the port users will be connecting to
 
 #define BACKLOG 10	 // how many pending connections queue will hold
-#define MAXDATASIZE 2 // data to be recieved
+#define MAXDATASIZE 100 // data to be recieved
 void sigchld_handler(int s)
 {
 #ifdef DEBUGGER
@@ -178,52 +178,49 @@ int main(void)
 #ifdef DEBUGGER
             printf("DEBUG86: sending msg to new_fd = %d\n", new_fd);
 #endif
-			if (send(new_fd, "Connected to Server...\nPlease Enter Command", 45, 0) == -1)
+			if (send(new_fd, "Connected to Server...\nPlease Enter Command:\n", 45, 0) == -1)
 				perror("send failed");
             while(1)
             {
-            if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE,0)) == -1) {
-				perror("recv failed");
-                exit(1);
-            }
-            commandBuf[numbytes] = '\0';
-            printf("server: received command '%c' \n", commandBuf[0]);
-            switch(commandBuf[0])
-            {
-                case 'a': {
-                    if (send(new_fd, "A received\n", 10, 0) == -1)
-                    perror("send failed");
-                    break;
+                if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE,0)) == -1) {
+                    perror("recv failed");
+                    exit(1);
                 }
-                case 'e': {
-                    if (send(new_fd, "Exiting Server\n", 10, 0) == -1)
+                commandBuf[numbytes] = '\0';
+                printf("server: received command '%s' \n", commandBuf);
+            
+                if(strcmp("list",commandBuf) == 0)
+                {
+                    if (send(new_fd, "Command 'list' received\nPlease enter command: ", 47, 0) == -1)
                         perror("send failed");
-                    printf("Closing Connection with %s", s);
+                }
+                else if(strcmp("check",commandBuf) == 0)
+                {
+                    if (send(new_fd, "Command 'check' received\nPlease enter command: ", 48, 0) == -1)
+                        perror("send failed");
+                }
+                else if(strcmp("display",commandBuf) == 0)
+                {
+                    if (send(new_fd, "Command 'display' received\nPlease enter command: ", 50, 0) == -1)
+                        perror("send failed");
+                }
+                else if(strcmp("download",commandBuf) == 0)
+                {
+                    if (send(new_fd, "Command 'download' received\nPlease enter command: ", 51, 0) == -1)
+                        perror("send failed");
+                }
+                else if(strcmp("quit",commandBuf) == 0)
+                {
+                    if (send(new_fd, "Command 'quit' received\nPlease enter command: ", 47, 0) == -1)
+                        perror("send failed");
                     close(new_fd);
                     exit(0);
-                    break;
                 }
-                case 'i': {
-                    if (send(new_fd, "I received\n", 10, 0) == -1)
+                else
+                {
+                    if (send(new_fd, "Unknown Command received\nPlease enter command: ", 47, 0) == -1)
                         perror("send failed");
-                    break;
                 }
-                case 'o': {
-                    if (send(new_fd, "O received\n", 10, 0) == -1)
-                        perror("send failed");
-                    break;
-                }
-                case 'u': {
-                    if (send(new_fd, "U received\n", 10, 0) == -1)
-                        perror("send failed");
-                    break;
-                }
-                default: {
-                    if (send(new_fd, "Unknown Command\n", 15, 0) == -1)
-                        perror("send failed");
-                    break;
-                }
-            }
             }
 		}
 #ifdef DEBUGGER
