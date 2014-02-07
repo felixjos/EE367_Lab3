@@ -213,6 +213,7 @@ int main(void)
                 {
                     if (send(new_fd, "Command 'quit' received\nPlease enter command: ", 47, 0) == -1)
                         perror("send failed");
+                    printf("Closing connection with %s\n", s);
                     close(new_fd);
                     exit(0);
                 }
