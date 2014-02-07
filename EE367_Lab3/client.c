@@ -19,6 +19,7 @@
 #define MAXDATASIZE 100 // max number of bytes we can get at once
 
 #define DEBUGGER 1
+#define VALIDCMD(c) ((c) == 'a' || (c) == 'e' || (c) == 'i' || (c) == 'o' || (c) == 'u')
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -40,7 +41,9 @@ void get_address(int *argc, char *addr)
 
 void get_command(char *command)
 {
+    
     scanf("%c", command);
+    
 }
 
 
@@ -110,19 +113,20 @@ int main()
 	}
 
 	buf[numbytes] = '\0';
-
 	printf("client: received '%s'\n",buf);
 
+
     
-    while(command != 'a')
+    while(1)
     {
         get_command(&command);
-    }
-    
+        
+    if (command != '\n')
+    {
+        
     if (send(sockfd, &command, 1, 0) == -1) {
 	    perror("send failed");
 	}
-    
     
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
 	    perror("recv");
@@ -130,15 +134,18 @@ int main()
 	}
     
 	buf[numbytes] = '\0';
-    
 	printf("client: received '%s'\n",buf);
-
     
     
+    if(command == 'e')
+	{
+        close(sockfd);
+        return 0;
+    }
+    }
+        
+    }
     
-    
-	close(sockfd);
-
-	return 0;
+	
 }
 
