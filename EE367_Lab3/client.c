@@ -1,4 +1,6 @@
-/*
+
+
+// COMMENT
 ** client.c -- a stream socket client demo
 */
 
