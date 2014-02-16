@@ -24,22 +24,13 @@
 
 void sigchld_handler(int s)
 {
-#ifdef DEBUGGER
-    printf("DEBUG:calling sigchld_handler\n");
-#endif
 	while(waitpid(-1, NULL, WNOHANG) > 0);
 }
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
 {
-#ifdef DEBUGGER
-    printf("DEBUG: calling get_in_addr\n");
-#endif
 	if (sa->sa_family == AF_INET) {
-#ifdef DEBUGGER
-        printf("DEBUG:38\n");
-#endif
 		return &(((struct sockaddr_in*)sa)->sin_addr);
 	}
 
@@ -58,11 +49,9 @@ int main(void)
 	int rv;
     int numbytes;
     char commandBuf[MAXDATASIZE];
-    char sendBuff[MAXDATASIZE];
     FILE * fd;
     int i;
     int fileFlag = 0;
-    int c;
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -70,53 +59,26 @@ int main(void)
 	hints.ai_flags = AI_PASSIVE; // use my IP
 
 	if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
-#ifdef DEBUGGER
-        printf("DEBUG:59");
-#endif
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
-#ifdef DEBUGGER
-    printf("DEBUG: rv value = %d\n", rv);
-#endif
 	// loop through all the results and bind to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next) {
-#ifdef DEBUGGER
-        printf("DEBUG:68\n");
-#endif
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {
-#ifdef DEBUGGER
-            printf("DEBUG:72");
-#endif
 			perror("server: socket");
 			continue;
 		}
-#ifdef DEBUGGER
-        printf("DEBUG86: sockfd = %d\n", sockfd);
-#endif
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
 				sizeof(int)) == -1) {
-#ifdef DEBUGGER
-            printf("DEBUG:81");
-#endif
 			perror("setsockopt");
 			exit(1);
 		}
-#ifdef DEBUGGER
-        printf("DEBUG97: sockfd = %d\n", sockfd);
-#endif
 		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-#ifdef DEBUGGER
-            printf("DEBUG:90");
-#endif
 			close(sockfd);
 			perror("server: bind");
 			continue;
 		}
-#ifdef DEBUGGER
-        printf("DEBUG108: sockfd = %d\n", sockfd);
-#endif
 		break;
 	}
 
@@ -128,9 +90,6 @@ int main(void)
 	freeaddrinfo(servinfo); // all done with this structure
 
 	if (listen(sockfd, BACKLOG) == -1) {
-#ifdef DEBUGGER
-        printf("DEBUG:109");
-#endif
 		perror("listen");
 		exit(1);
 	}
@@ -139,9 +98,6 @@ int main(void)
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	if (sigaction(SIGCHLD, &sa, NULL) == -1) {
-#ifdef DEBUGGER
-        printf("DEBUG:120");
-#endif
 		perror("sigaction");
 		exit(1);
 	}
@@ -241,22 +197,14 @@ int main(void)
                     fd = fopen(commandBuf, "r");
                     if(fd != NULL && !fileFlag)
                     {
+                        fclose(fd);
                         if(fork() == 0)
                         {
-                            
                             close(1);
                             dup2(new_fd, 1);
                             
-                            while(1)
-                            {
-                                c = fgetc(fd);
-                                if(feof(fd))
-                                    break;
-                                putchar(c);
-                            }
-                            fclose(fd);
-                            putchar('\0');
-                            return 0;
+                            execl("/bin/cat", "cat", commandBuf, NULL);
+                            printf("ls command failed\n");
                         }
                     }
                     else
@@ -269,10 +217,46 @@ int main(void)
                 }
                 else if(strcmp("download",commandBuf) == 0)
                 {
-                    if (send(new_fd, "Command 'download' received\nPlease enter command: ", 51, 0) == -1) {
+                    if (send(new_fd, "Command 'download' received\nPlease enter filename: ", 49, 0) == -1) {
                         perror("send failed");
                         exit(1);
                     }
+                    if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE,0)) == -1) {
+                        perror("recv failed");
+                        exit(1);
+                    }
+                    for( i = 0; commandBuf[i] != '\0'; i++)
+                    {
+                        if( !FILECHECK(commandBuf[i]) )
+                        {
+                            fileFlag = 1;
+                        }
+                    }
+                    fd = fopen(commandBuf, "r");
+                    if(fd != NULL && !fileFlag)
+                    {
+                        if (send(new_fd, "filedownload", 12, 0) == -1) {
+                            perror("send failed");
+                            exit(1);
+                        }
+                        fclose(fd);
+                        if(fork() == 0)
+                        {
+                            close(1);
+                            dup2(new_fd, 1);
+                            
+                            execl("/bin/cat", "cat", commandBuf, NULL);
+                            printf("ls command failed\n");
+                        }
+                    }
+                    else
+                    {
+                        if (send(new_fd, "File does not exist\n", 22, 0) == -1) {
+                            perror("send failed");
+                            exit(1);
+                        }
+                    }
+                    
                 }
                 else if(strcmp("quit",commandBuf) == 0)
                 {
