@@ -16,10 +16,11 @@
 
 #define PORT "3490" // the port client will be connecting to 
 
-#define MAXDATASIZE 100 // max number of bytes we can get at once
+#define MAXDATASIZE 1000 // max number of bytes we can get at once
 
 #define DEBUGGER 1
 #define VALIDCMD(c) ((c) == 'a' || (c) == 'e' || (c) == 'i' || (c) == 'o' || (c) == 'u')
+#define TERMCODE == "termcode"
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -113,8 +114,6 @@ int main()
 	buf[numbytes] = '\0';
 	printf("client: received '%s'\n",buf);
 
-
-    
     while(1)
     {
         get_command(&command);
@@ -128,11 +127,11 @@ int main()
 	    perror("send failed");
 	}
     
-    if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
-	    perror("recv");
-	    exit(1);
-	}
-    
+        if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+            perror("recv");
+            exit(1);
+        }
+
 	buf[numbytes] = '\0';
 	printf("client: received '%s'\n",buf);
     
