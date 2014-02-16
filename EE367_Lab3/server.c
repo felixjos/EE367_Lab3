@@ -178,8 +178,10 @@ int main(void)
 #ifdef DEBUGGER
             printf("DEBUG86: sending msg to new_fd = %d\n", new_fd);
 #endif
-			if (send(new_fd, "Connected to Server...\nPlease Enter Command:\n", 45, 0) == -1)
+			if (send(new_fd, "Connected to Server...\nPlease Enter Command:\n", 45, 0) == -1) {
 				perror("send failed");
+                exit(1);
+            }
             while(1)
             {
                 if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE,0)) == -1) {
@@ -191,36 +193,53 @@ int main(void)
             
                 if(strcmp("list",commandBuf) == 0)
                 {
-                    if (send(new_fd, "Command 'list' received\nPlease enter command: ", 47, 0) == -1)
+                    if (send(new_fd, "Command 'list' received\nPlease enter command: ", 47, 0) == -1) {
                         perror("send failed");
+                        exit(1);
+                    }
                 }
                 else if(strcmp("check",commandBuf) == 0)
                 {
-                    if (send(new_fd, "Command 'check' received\nPlease enter command: ", 48, 0) == -1)
+                    if (send(new_fd, "Command 'check' received\nPlease enter filename: ", 49, 0) == -1) {
                         perror("send failed");
+                        exit(1);
+                    }
+                    if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE,0)) == -1) {
+                        perror("recv failed");
+                        exit(1);
+                    }
+                        exit(1);
                 }
                 else if(strcmp("display",commandBuf) == 0)
                 {
-                    if (send(new_fd, "Command 'display' received\nPlease enter command: ", 50, 0) == -1)
+                    if (send(new_fd, "Command 'display' received\nPlease enter command: ", 50, 0) == -1) {
                         perror("send failed");
+                        exit(1);
+                    }
                 }
                 else if(strcmp("download",commandBuf) == 0)
                 {
-                    if (send(new_fd, "Command 'download' received\nPlease enter command: ", 51, 0) == -1)
+                    if (send(new_fd, "Command 'download' received\nPlease enter command: ", 51, 0) == -1) {
                         perror("send failed");
+                        exit(1);
+                    }
                 }
                 else if(strcmp("quit",commandBuf) == 0)
                 {
-                    if (send(new_fd, "Command 'quit' received\nPlease enter command: ", 47, 0) == -1)
+                    if (send(new_fd, "Command 'quit' received\nPlease enter command: ", 47, 0) == -1) {
                         perror("send failed");
+                        exit(1);
+                    }
                     printf("Closing connection with %s\n", s);
                     close(new_fd);
                     exit(0);
                 }
                 else
                 {
-                    if (send(new_fd, "Unknown Command received\nPlease enter command: ", 47, 0) == -1)
+                    if (send(new_fd, "Unknown Command received\nPlease enter command: ", 47, 0) == -1) {
                         perror("send failed");
+                        exit(1);
+                    }
                 }
             }
 		}
