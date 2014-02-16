@@ -18,7 +18,10 @@
 #define PORT "3490"  // the port users will be connecting to
 
 #define BACKLOG 10	 // how many pending connections queue will hold
-#define MAXDATASIZE 100 // data to be recieved
+#define MAXDATASIZE 1000 // data to be recieved
+
+#define FILECHECK(c)        ((c) == '-' || (c) == '_' || (c) == '.' || ((c) >= '0' && (c) <= '9') || ((c) >= 'A' && (c) <= 'z'))
+
 void sigchld_handler(int s)
 {
 #ifdef DEBUGGER
@@ -55,6 +58,11 @@ int main(void)
 	int rv;
     int numbytes;
     char commandBuf[MAXDATASIZE];
+    char sendBuff[MAXDATASIZE];
+    FILE * fd;
+    int i;
+    int fileFlag = 0;
+    int c;
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -141,43 +149,19 @@ int main(void)
 	printf("server: waiting for connections...\n");
 
 	while(1) {  // main accept() loop
-#ifdef DEBUGGER
-        printf("DEBUG-105:entering while loop\n");
-#endif
 		sin_size = sizeof their_addr;
-#ifdef DEBUGGER
-        printf("DEBUG: Accept...\n");
-#endif
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-#ifdef DEBUGGER
-        printf("DEBUG86: newfd = %d\n", new_fd);
-#endif
 		if (new_fd == -1) {
-#ifdef DEBUGGER
-            printf("DEBUG:new_fd = -1");
-#endif
 			perror("accept failed");
 			continue;
 		}
-#ifdef DEBUGGER
-        printf("DEBUG: inet_ntop...\n");
-#endif
 		inet_ntop(their_addr.ss_family,
 			get_in_addr((struct sockaddr *)&their_addr),
 			s, sizeof s);
 		printf("server: got connection from %s\n", s);
 
 		if (!fork()) { // this is the child process
-#ifdef DEBUGGER
-            printf("DEBUG:fork = 0\n");
-#endif
-#ifdef DEBUGGER
-            printf("DEBUG:closeing socket sockfd\n");
-#endif
 			close(sockfd); // child doesn't need the listener
-#ifdef DEBUGGER
-            printf("DEBUG86: sending msg to new_fd = %d\n", new_fd);
-#endif
 			if (send(new_fd, "Connected to Server...\nPlease Enter Command:\n", 45, 0) == -1) {
 				perror("send failed");
                 exit(1);
@@ -193,9 +177,14 @@ int main(void)
             
                 if(strcmp("list",commandBuf) == 0)
                 {
-                    if (send(new_fd, "Command 'list' received\nPlease enter command: ", 47, 0) == -1) {
-                        perror("send failed");
-                        exit(1);
+                    if(fork() == 0)
+                    {
+                        close(1);
+                        
+                        dup2(new_fd, 1);
+                        
+                        execl("/bin/ls", "ls", NULL);
+                        printf("ls command failed\n");
                     }
                 }
                 else if(strcmp("check",commandBuf) == 0)
@@ -208,13 +197,74 @@ int main(void)
                         perror("recv failed");
                         exit(1);
                     }
-                        exit(1);
+                    for( i = 0; commandBuf[i] != '\0'; i++)
+                    {
+                        if( !FILECHECK(commandBuf[i]) )
+                        {
+                            fileFlag = 1;
+                        }
+                    }
+                    fd = fopen(commandBuf, "r");
+                    if(fd != NULL && !fileFlag)
+                    {
+                        if (send(new_fd, "File exists\n", 13, 0) == -1) {
+                            perror("send failed");
+                            exit(1);
+                        }
+                        fclose(fd);
+                    }
+                    else
+                    {
+                        if (send(new_fd, "File does not exist\n", 22, 0) == -1) {
+                            perror("send failed");
+                            exit(1);
+                        }
+                    }
                 }
                 else if(strcmp("display",commandBuf) == 0)
                 {
-                    if (send(new_fd, "Command 'display' received\nPlease enter command: ", 50, 0) == -1) {
+                    if (send(new_fd, "Command 'display' received\nPlease enter filename: ", 49, 0) == -1) {
                         perror("send failed");
                         exit(1);
+                    }
+                    if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE,0)) == -1) {
+                        perror("recv failed");
+                        exit(1);
+                    }
+                    for( i = 0; commandBuf[i] != '\0'; i++)
+                    {
+                        if( !FILECHECK(commandBuf[i]) )
+                        {
+                            fileFlag = 1;
+                        }
+                    }
+                    fd = fopen(commandBuf, "r");
+                    if(fd != NULL && !fileFlag)
+                    {
+                        if(fork() == 0)
+                        {
+                            
+                            close(1);
+                            dup2(new_fd, 1);
+                            
+                            while(1)
+                            {
+                                c = fgetc(fd);
+                                if(feof(fd))
+                                    break;
+                                putchar(c);
+                            }
+                            fclose(fd);
+                            putchar('\0');
+                            return 0;
+                        }
+                    }
+                    else
+                    {
+                        if (send(new_fd, "File does not exist\n", 22, 0) == -1) {
+                            perror("send failed");
+                            exit(1);
+                        }
                     }
                 }
                 else if(strcmp("download",commandBuf) == 0)
@@ -243,9 +293,6 @@ int main(void)
                 }
             }
 		}
-#ifdef DEBUGGER
-        printf("DEBUG179: Parent waiting to close new_fd\n");
-#endif
 		close(new_fd);  // parent doesn't need this
 	}
 
