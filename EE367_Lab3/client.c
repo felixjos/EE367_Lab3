@@ -127,10 +127,32 @@ int main()
 	    perror("send failed");
 	}
     
+
+    if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+        perror("recv");
+        exit(1);
+    }
+        buf[numbytes] = '\0';
+        
+        
+    if(strcmp(buf,"filedownload") == 0)
+    {
+        FILE *fd;
+        fd = fopen(command, "w");
+        
         if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
             perror("recv");
             exit(1);
         }
+        buf[numbytes] = '\0';
+        
+        fprintf(fd, "%s", buf);
+        fclose(fd);
+
+    }
+    else
+    {
+            
 
 	buf[numbytes] = '\0';
 	printf("client: received '%s'\n",buf);
@@ -141,6 +163,8 @@ int main()
         close(sockfd);
         return 0;
     }
+    }
+        
     }
         
     }
