@@ -18,7 +18,7 @@
 #define PORT "3490"  // the port users will be connecting to
 
 #define BACKLOG 10	 // how many pending connections queue will hold
-#define MAXDATASIZE 1000 // data to be recieved
+#define MAXDATASIZE 100 // data to be recieved
 
 #define FILECHECK(c)        ((c) == '-' || (c) == '_' || (c) == '.' || ((c) >= '0' && (c) <= '9') || ((c) >= 'A' && (c) <= 'z'))
 
@@ -119,7 +119,7 @@ int main(void)
 
 		if (!fork()) { // this is the child process
 			close(sockfd); // child doesn't need the listener
-			if (send(new_fd, "Connected to Server...\nPlease Enter Command:\n", 45, 0) == -1) {
+			if (send(new_fd, "\nConnected to Server...\nPlease Enter Command:\n", 47, 0) == -1) {
 				perror("send failed");
                 exit(1);
             }
@@ -160,7 +160,7 @@ int main(void)
                     fd = fopen(fileName, "r");
                     if(fd != NULL && !fileFlag)
                     {
-                        if (send(new_fd, "File exists\n", 13, 0) == -1) {
+                        if (send(new_fd, "\nFile exists\nPlease Enter Command: ", 37, 0) == -1) {
                             perror("send failed");
                             exit(1);
                         }
@@ -168,7 +168,7 @@ int main(void)
                     }
                     else
                     {
-                        if (send(new_fd, "File does not exist\n", 22, 0) == -1) {
+                        if (send(new_fd, "\nFile does not exist\nPlease Enter Command: ", 46, 0) == -1) {
                             perror("send failed");
                             exit(1);
                         }
@@ -186,8 +186,7 @@ int main(void)
                     for(;commandBuf[i] != '\0'; i++)
                     {
                         fileName[i-j] = commandBuf[i];
-                        printf("FileName: %s", fileName);
-                        if( !FILECHECK(commandBuf[i]) )
+                        if( !FILECHECK(fileName[i-j]) )
                         {
                             fileFlag = 1;
                         }
@@ -201,13 +200,13 @@ int main(void)
                             close(1);
                             dup2(new_fd, 1);
                             
-                            execl("/bin/cat", "cat", commandBuf, NULL);
+                            execl("/bin/cat", "cat", fileName, NULL);
                             printf("ls command failed\n");
                         }
                     }
                     else
                     {
-                        if (send(new_fd, "File does not exist\n", 22, 0) == -1) {
+                        if (send(new_fd, "\nFile does not exist\n", 24, 0) == -1) {
                             perror("send failed");
                             exit(1);
                         }
@@ -215,7 +214,7 @@ int main(void)
                 }
                 else if(strcmp("quit",commandBuf) == 0)
                 {
-                    if (send(new_fd, "Command 'quit' received\nPlease enter command: ", 47, 0) == -1) {
+                    if (send(new_fd, "\nCommand 'quit' received\nPlease enter command: ", 49, 0) == -1) {
                         perror("send failed");
                         exit(1);
                     }
@@ -225,7 +224,7 @@ int main(void)
                 }
                 else
                 {
-                    if (send(new_fd, "Unknown Command received\nPlease enter command: ", 47, 0) == -1) {
+                    if (send(new_fd, "\nUnknown Command received\nPlease enter command: ", 49, 0) == -1) {
                         perror("send failed");
                         exit(1);
                     }
