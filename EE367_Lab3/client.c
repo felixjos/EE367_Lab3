@@ -15,7 +15,7 @@
 
 #include <arpa/inet.h>
 
-#define PORT "3490" // the port client will be connecting to 
+#define PORT "3503" // the port client will be connecting to
 
 #define MAXDATASIZE 100 // max number of bytes we can get at once
 
@@ -141,7 +141,18 @@ int main(int argc, char *argv[])
             {
                 for(i = 9; command[i] != '\0'; i++)
                     filename[i-9] = command[i];
-                fd = fopen(filename, "w");
+                if( (fd = fopen(filename, "r")) != NULL)
+                {
+                    printf("File %s exists, do you wish to overright (y/n): ", filename);
+                    get_command(&command);
+                    if( strncmp(command, "y", 0) == 0)
+                        fd = fopen(filename, "w");
+                    else
+                    {
+                        downloadFlag = 0;
+                        numbytes = 0;
+                    }
+                }
             }
             while(numbytes >= MAXDATASIZE-1)
             {
