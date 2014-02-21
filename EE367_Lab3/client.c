@@ -127,44 +127,57 @@ int main()
 	}
     
         // Recieve reply
-    if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
-        perror("recv");
-        exit(1);
-    }
+        numbytes = MAXDATASIZE-1;
+        printf("numbytes: %d \n", numbytes);
         
-        buf[numbytes] = '\0';
+        while(numbytes >= MAXDATASIZE-1)
+        {
+            if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+                perror("recv");
+                exit(1);
+            }
+            
+            printf("while: numbytes: %d \n", numbytes);
+            buf[numbytes] = '\0';
+        }
         
-        // Download File
+        // download command
     if(strcmp(buf,"filedownload") == 0)
     {
         FILE *fd;
         fd = fopen(command, "w");
         
+        numbytes = MAXDATASIZE;
+        printf("numbytes: %d \n", numbytes);
+        
+        while(numbytes >= MAXDATASIZE-1)
+        {
         if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
             perror("recv");
             exit(1);
         }
+            
+        printf("while: numbytes: %d \n", numbytes);
         buf[numbytes] = '\0';
-        
         fprintf(fd, "%s", buf);
-        fclose(fd);
+        }
 
+        fclose(fd);
     }
-        
     else
     {
             
 
 	buf[numbytes] = '\0';
 	printf("client: received '%s'\n",buf);
-    }
+    
     
     if(strcmp(command,"quit") == 0)
 	{
         close(sockfd);
         return 0;
     }
-    
+    }
         
     }
         
