@@ -15,7 +15,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-#define PORT "3490"  // the port users will be connecting to
+#define PORT "3503"  // the port users will be connecting to
 
 #define BACKLOG 10	 // how many pending connections queue will hold
 #define MAXDATASIZE 100 // data to be recieved
@@ -150,13 +150,12 @@ int main(void)
                     for( i = 6; commandBuf[i] != '\0'; i++)
                     {
                         fileName[i-6] = commandBuf[i];
-                        printf("FileName: %s", fileName);
                         if( !FILECHECK(commandBuf[i]) )
                         {
                             fileFlag = 1;
                         }
                     }
-                    
+                    fileName[i-6] = commandBuf[i];
                     fd = fopen(fileName, "r");
                     if(fd != NULL && !fileFlag)
                     {
@@ -191,6 +190,7 @@ int main(void)
                             fileFlag = 1;
                         }
                     }
+                    fileName[i-6] = commandBuf[i];
                     fd = fopen(fileName, "r");
                     if(fd != NULL && !fileFlag)
                     {
