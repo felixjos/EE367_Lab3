@@ -49,8 +49,9 @@ int main(void)
 	int rv;
     int numbytes;
     char commandBuf[MAXDATASIZE];
+    char fileName[MAXDATASIZE];
     FILE * fd;
-    int i;
+    int i, j;
     int fileFlag = 0;
 
 	memset(&hints, 0, sizeof hints);
@@ -124,7 +125,7 @@ int main(void)
             }
             while(1)
             {
-                if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE,0)) == -1) {
+                if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE-1,0)) == -1) {
                     perror("recv failed");
                     exit(1);
                 }
@@ -143,24 +144,20 @@ int main(void)
                         printf("ls command failed\n");
                     }
                 }
-                else if(strcmp("check",commandBuf) == 0)
+                /************* Check ************/
+                else if(strncmp("check",commandBuf, 4) == 0)
                 {
-                    if (send(new_fd, "Command 'check' received\nPlease enter filename: ", 49, 0) == -1) {
-                        perror("send failed");
-                        exit(1);
-                    }
-                    if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE,0)) == -1) {
-                        perror("recv failed");
-                        exit(1);
-                    }
-                    for( i = 0; commandBuf[i] != '\0'; i++)
+                    for( i = 6; commandBuf[i] != '\0'; i++)
                     {
+                        fileName[i-6] = commandBuf[i];
+                        printf("FileName: %s", fileName);
                         if( !FILECHECK(commandBuf[i]) )
                         {
                             fileFlag = 1;
                         }
                     }
-                    fd = fopen(commandBuf, "r");
+                    
+                    fd = fopen(fileName, "r");
                     if(fd != NULL && !fileFlag)
                     {
                         if (send(new_fd, "File exists\n", 13, 0) == -1) {
@@ -177,86 +174,44 @@ int main(void)
                         }
                     }
                 }
-                else if(strcmp("display",commandBuf) == 0)
+                /************* Get ************/
+                else if((strncmp("display",commandBuf, 6) == 0) || strncmp("download",commandBuf, 7) == 0)
                 {
-                    if (send(new_fd, "Command 'display' received\nPlease enter filename: ", 49, 0) == -1) {
-                        perror("send failed");
-                        exit(1);
-                    }
-                    if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE,0)) == -1) {
-                        perror("recv failed");
-                        exit(1);
-                    }
-                    for( i = 0; commandBuf[i] != '\0'; i++)
+                    for ( i = 0 ; commandBuf[i] != ' ' ; i++)
                     {
-                        if( !FILECHECK(commandBuf[i]) )
-                        {
-                            fileFlag = 1;
-                        }
                     }
-                    fd = fopen(commandBuf, "r");
-                    if(fd != NULL && !fileFlag)
-                    {
-                        fclose(fd);
-                        if(fork() == 0)
-                        {
-                            close(1);
-                            dup2(new_fd, 1);
-                            
-                            execl("/bin/cat", "cat", commandBuf, NULL);
-                            printf("ls command failed\n");
-                        }
-                    }
-                    else
-                    {
-                        if (send(new_fd, "File does not exist\n", 22, 0) == -1) {
-                            perror("send failed");
-                            exit(1);
-                        }
-                    }
-                }
-                else if(strcmp("download",commandBuf) == 0)
-                {
-                    if (send(new_fd, "Command 'download' received\nPlease enter filename: ", 49, 0) == -1) {
-                        perror("send failed");
-                        exit(1);
-                    }
-                    if ((numbytes = recv(new_fd, commandBuf, MAXDATASIZE,0)) == -1) {
-                        perror("recv failed");
-                        exit(1);
-                    }
-                    for( i = 0; commandBuf[i] != '\0'; i++)
-                    {
-                        if( !FILECHECK(commandBuf[i]) )
-                        {
-                            fileFlag = 1;
-                        }
-                    }
-                    fd = fopen(commandBuf, "r");
-                    if(fd != NULL && !fileFlag)
-                    {
-                        if (send(new_fd, "filedownload", 12, 0) == -1) {
-                            perror("send failed");
-                            exit(1);
-                        }
-                        fclose(fd);
-                        if(fork() == 0)
-                        {
-                            close(1);
-                            dup2(new_fd, 1);
-                            
-                            execl("/bin/cat", "cat", commandBuf, NULL);
-                            printf("ls command failed\n");
-                        }
-                    }
-                    else
-                    {
-                        if (send(new_fd, "File does not exist\n", 22, 0) == -1) {
-                            perror("send failed");
-                            exit(1);
-                        }
-                    }
+                    i++;
+                    j = i;
                     
+                    for(;commandBuf[i] != '\0'; i++)
+                    {
+                        fileName[i-j] = commandBuf[i];
+                        printf("FileName: %s", fileName);
+                        if( !FILECHECK(commandBuf[i]) )
+                        {
+                            fileFlag = 1;
+                        }
+                    }
+                    fd = fopen(fileName, "r");
+                    if(fd != NULL && !fileFlag)
+                    {
+                        fclose(fd);
+                        if(fork() == 0)
+                        {
+                            close(1);
+                            dup2(new_fd, 1);
+                            
+                            execl("/bin/cat", "cat", commandBuf, NULL);
+                            printf("ls command failed\n");
+                        }
+                    }
+                    else
+                    {
+                        if (send(new_fd, "File does not exist\n", 22, 0) == -1) {
+                            perror("send failed");
+                            exit(1);
+                        }
+                    }
                 }
                 else if(strcmp("quit",commandBuf) == 0)
                 {
