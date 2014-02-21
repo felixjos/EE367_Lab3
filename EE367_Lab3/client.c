@@ -11,12 +11,13 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <time.h>
 
 #include <arpa/inet.h>
 
 #define PORT "3490" // the port client will be connecting to 
 
-#define MAXDATASIZE 1000 // max number of bytes we can get at once
+#define MAXDATASIZE 100 // max number of bytes we can get at once
 
 #define DEBUGGER 1
 #define VALIDCMD(c) ((c) == 'a' || (c) == 'e' || (c) == 'i' || (c) == 'o' || (c) == 'u')
@@ -31,7 +32,7 @@ void *get_in_addr(struct sockaddr *sa)
 
 	return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
-
+/*
 void get_address(int *argc, char *addr)
 {
     fprintf(stderr,"Please enter IP Address of Server: ");
@@ -39,7 +40,7 @@ void get_address(int *argc, char *addr)
     fprintf(stderr,"Connecting to Server Address: %s\n",addr);
     *argc = 2;
 }
-
+*/
 void get_command(char *command)
 {
     char *p;
@@ -49,22 +50,18 @@ void get_command(char *command)
 }
 
 
-int main()
+int main(int argc, char *argv[])
 {
 	int sockfd, numbytes;  
 	char buf[MAXDATASIZE];
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
 	char s[INET6_ADDRSTRLEN];
-    int argc;
-    char address[100];
-    char *addr = &address[0];
     char command[MAXDATASIZE];
+    char filename[MAXDATASIZE];
     int i;
-
     
 /*********** Ask user for server address ************/
-    get_address(&argc, addr);
     
     fprintf(stderr, "Checking Argc value = %d\n", argc);
 	if (argc != 2) {
@@ -76,7 +73,7 @@ int main()
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 
-	if ((rv = getaddrinfo(&addr[0], PORT, &hints, &servinfo)) != 0) {
+	if ((rv = getaddrinfo(argv[1], PORT, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
@@ -135,15 +132,20 @@ int main()
             }
     // Recieve reply
             numbytes = MAXDATASIZE-1;
-            printf("numbytes: %d \n", numbytes);
         FILE *fd;
+            
+            sleep(1);
+            if( (strncmp(command, "download", 7)) == 0)
+                downloadFlag = 1;
+            if(downloadFlag)
+            {
+                for(i = 9; command[i] != '\0'; i++)
+                    filename[i-9] = command[i];
+                fd = fopen(filename, "w");
+            }
             while(numbytes >= MAXDATASIZE-1)
             {
-                printf("entered while loop\n");
                 // If client asks to download, FLAG
-                if(downloadFlag)
-                    fd = fopen(command, "w");
-                
                 if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
                     perror("recv");
                     exit(1);
@@ -152,7 +154,7 @@ int main()
                 if(downloadFlag)
                     fprintf(fd, "%s", buf);
                 else
-                    printf("client: received '%s'\n",buf);
+                    printf("%s",buf);
             }
             // Reset Download Flag
             if(downloadFlag == 1)
@@ -160,12 +162,10 @@ int main()
                 fclose(fd);
                 downloadFlag = 0;
             }
-            if( (strncmp(command, "download", 7)) == 0)
-                downloadFlag = 1;
             if(strcmp(command,"quit") == 0)
             {
                 close(sockfd);
-            return 0;
+                return 0;
             }
         }
     }
