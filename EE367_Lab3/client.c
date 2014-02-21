@@ -42,7 +42,10 @@ void get_address(int *argc, char *addr)
 
 void get_command(char *command)
 {
-    scanf("%s", command);
+    char *p;
+    fgets(command, MAXDATASIZE, stdin);
+    if((p = strchr(command, '\n')) != NULL)
+        *p = '\0';
 }
 
 
@@ -57,7 +60,10 @@ int main()
     char address[100];
     char *addr = &address[0];
     char command[MAXDATASIZE];
+    int i;
 
+    
+/*********** Ask user for server address ************/
     get_address(&argc, addr);
     
     fprintf(stderr, "Checking Argc value = %d\n", argc);
@@ -111,78 +117,57 @@ int main()
 	buf[numbytes] = '\0';
 	printf("client: received '%s'\n",buf);
 
+    
+/********* Begin Connection/Command Loop **********/
     while(1)
     {
+        int downloadFlag = 0;
+        
         get_command(&command);
      
-    if(strcmp(command,"help") == 0)
-        printf("list: list files at the server\ncheck <file name>: checks if there is a file <file name>\ndisplay <file name>: Displays the contents of <file name>\ndownload <file name>: Download <file name>\nquit: Close the connection to the server\nPlease Enter Command:\n");
-    else if (strcmp(command,"\n") != 0)
-    {
-        
-        
-        // Send Command
-    if (send(sockfd, &command, MAXDATASIZE-1, 0) == -1) {
-	    perror("send failed");
-	}
-    
-        // Recieve reply
-        numbytes = MAXDATASIZE-1;
-        printf("numbytes: %d \n", numbytes);
-        
-        while(numbytes >= MAXDATASIZE-1)
+        if(strcmp(command,"help") == 0)
+            printf("list: list files at the server\ncheck <file name>: checks if there is a file <file name>\ndisplay <file name>: Displays the contents of <file name>\ndownload <file name>: Download <file name>\nquit: Close the connection to the server\nPlease Enter Command:\n");
+        else if (strcmp(command,"\n") != 0)
         {
-            if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
-                perror("recv");
-                exit(1);
+    // Send Command
+            if (send(sockfd, &command, MAXDATASIZE-1, 0) == -1) {
+                perror("send failed");
             }
-            
-            printf("while: numbytes: %d \n", numbytes);
-            buf[numbytes] = '\0';
-        }
-        
-        // download command
-    if(strcmp(buf,"filedownload") == 0)
-    {
+    // Recieve reply
+            numbytes = MAXDATASIZE-1;
+            printf("numbytes: %d \n", numbytes);
         FILE *fd;
-        fd = fopen(command, "w");
-        
-        numbytes = MAXDATASIZE;
-        printf("numbytes: %d \n", numbytes);
-        
-        while(numbytes >= MAXDATASIZE-1)
-        {
-        if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
-            perror("recv");
-            exit(1);
+            while(numbytes >= MAXDATASIZE-1)
+            {
+                printf("entered while loop\n");
+                // If client asks to download, FLAG
+                if(downloadFlag)
+                    fd = fopen(command, "w");
+                
+                if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+                    perror("recv");
+                    exit(1);
+                }
+                buf[numbytes] = '\0';
+                if(downloadFlag)
+                    fprintf(fd, "%s", buf);
+                else
+                    printf("client: received '%s'\n",buf);
+            }
+            // Reset Download Flag
+            if(downloadFlag == 1)
+            {
+                fclose(fd);
+                downloadFlag = 0;
+            }
+            if( (strncmp(command, "download", 7)) == 0)
+                downloadFlag = 1;
+            if(strcmp(command,"quit") == 0)
+            {
+                close(sockfd);
+            return 0;
+            }
         }
-            
-        printf("while: numbytes: %d \n", numbytes);
-        buf[numbytes] = '\0';
-        fprintf(fd, "%s", buf);
-        }
-
-        fclose(fd);
     }
-    else
-    {
-            
-
-	buf[numbytes] = '\0';
-	printf("client: received '%s'\n",buf);
-    
-    
-    if(strcmp(command,"quit") == 0)
-	{
-        close(sockfd);
-        return 0;
-    }
-    }
-        
-    }
-        
-    }
-    
-	
 }
 
