@@ -103,9 +103,6 @@ int main()
 
 	freeaddrinfo(servinfo); // all done with this structure
 
-#ifdef DEBUGGER
-    printf("DEBUG 105: sockfd = %d\n",sockfd);
-#endif
 	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
 	    perror("recv");
 	    exit(1);
@@ -123,18 +120,21 @@ int main()
     else if (strcmp(command,"\n") != 0)
     {
         
+        
+        // Send Command
     if (send(sockfd, &command, MAXDATASIZE-1, 0) == -1) {
 	    perror("send failed");
 	}
     
-
+        // Recieve reply
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv");
         exit(1);
     }
+        
         buf[numbytes] = '\0';
         
-        
+        // Download File
     if(strcmp(buf,"filedownload") == 0)
     {
         FILE *fd;
@@ -150,20 +150,21 @@ int main()
         fclose(fd);
 
     }
+        
     else
     {
             
 
 	buf[numbytes] = '\0';
 	printf("client: received '%s'\n",buf);
-    
+    }
     
     if(strcmp(command,"quit") == 0)
 	{
         close(sockfd);
         return 0;
     }
-    }
+    
         
     }
         
