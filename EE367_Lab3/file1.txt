@@ -1,8 +1,0 @@
-Aloha!
-
-You have reached file 1.
-This means that your client and server works at least partially.
-Congratulations!!
-
-Adios
-
